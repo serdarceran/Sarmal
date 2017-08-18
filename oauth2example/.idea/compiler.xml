@@ -12,6 +12,7 @@
         <module name="oauth2example" />
         <module name="resource-server" />
         <module name="resource-server (1)" />
+        <module name="resource-server-2" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -21,6 +22,7 @@
       <module name="oauth2example" target="1.5" />
       <module name="resource-server" target="1.8" />
       <module name="resource-server (1)" target="1.8" />
+      <module name="resource-server-2" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

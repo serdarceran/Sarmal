@@ -9,20 +9,26 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.approval.ApprovalStore;
+import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 @Configuration
-public class AuthServConfig extends AuthorizationServerConfigurerAdapter {
+public class AuthServConfig extends AuthorizationServerConfigurerAdapter
+{
 
     @Value("${security.oauth2.jwt.privateKey}")
     private String jwtPrivateKey;
 
     @Value("${security.oauth2.jwt.publicKey}")
     private String jwtPublicKey;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Bean
-    public JwtAccessTokenConverter tokenConverter() {
+    public JwtAccessTokenConverter tokenConverter()
+    {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         converter.setSigningKey(jwtPrivateKey);
         converter.setVerifierKey(jwtPublicKey);
@@ -30,39 +36,47 @@ public class AuthServConfig extends AuthorizationServerConfigurerAdapter {
     }
 
     @Bean
-    public JwtTokenStore tokenStore() {
+    public JwtTokenStore tokenStore()
+    {
         return new JwtTokenStore(tokenConverter());
     }
 
-    @Override
-    public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-        oauthServer.tokenKeyAccess("isAnonymous() || hasRole('ROLE_TRUSTED_CLIENT') || permitAll()")
-                   .checkTokenAccess("hasRole('TRUSTED_CLIENT')");
+    @Bean
+    public ApprovalStore approvalStore()
+    {
+        return new InMemoryApprovalStore();
     }
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception
+    {
+        oauthServer.tokenKeyAccess("isAnonymous() || hasRole('ROLE_TRUSTED_CLIENT') || permitAll()")
+                .checkTokenAccess("hasRole('TRUSTED_CLIENT')");
+    }
 
     @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception
+    {
         endpoints.authenticationManager(authenticationManager)
-                 .tokenStore(tokenStore())
-                 .accessTokenConverter(tokenConverter());
+                .tokenStore(tokenStore())
+                .accessTokenConverter(tokenConverter())
+                .approvalStore(approvalStore())
+        ;
     }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws
-                                                                  Exception {
+            Exception
+    {
         clients.inMemory()
-               .withClient("client1")
-               .secret("secret1")
-               .scopes("createContact",
-                       "personalInfo")
-               .autoApprove(false)
-               .authorizedGrantTypes("authorization_code",
-                                     "client_credential",
-                                     "refresh_token");
+                .withClient("client1")
+                .secret("secret1")
+                .scopes("createContact",
+                        "personalInfo")
+                .autoApprove(false)
+                .authorizedGrantTypes("authorization_code",
+                        "client_credential",
+                        "refresh_token");
     }
-
 
 }

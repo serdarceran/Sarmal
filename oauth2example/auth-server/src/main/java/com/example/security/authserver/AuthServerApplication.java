@@ -49,7 +49,13 @@ public class AuthServerApplication {
             .and()
             .withUser("mehmet")
             .password("123")
-            .roles("USER");
+            .roles("USER")
+                .and()
+                .withUser("serdar")
+                .password("serdar")
+                .roles("USER",
+                        "ADMIN")
+                ;
     }
 
     public static void main(String[] args) {

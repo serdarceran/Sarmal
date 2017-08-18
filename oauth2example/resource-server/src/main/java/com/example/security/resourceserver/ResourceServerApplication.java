@@ -7,7 +7,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
 
 @SpringBootApplication
 @EnableResourceServer
@@ -17,11 +20,18 @@ public class ResourceServerApplication {
 
 	@PreAuthorize("#oauth2.hasScope('personalInfo')")
     @RequestMapping("/perInfo")
-	public Person person(){
+	public Person person(Principal principal){
 		Person person = new Person();
-		person.setAge(100);
-		person.setName("osman");
-		person.setSurname("yaycioglu");
+		if("osman".equals(principal.getName())) {
+			person.setAge(100);
+			person.setName("osman");
+			person.setSurname("yaycioglu");
+		}else {
+			person.setAge(10);
+			person.setName("mehmet");
+			person.setSurname("ahat");
+		}
+
 		return person;
 	}
 
